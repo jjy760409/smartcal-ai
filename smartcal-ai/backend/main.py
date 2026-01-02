@@ -31,22 +31,30 @@ def init_db():
     conn.close()
 
 init_db()
-model = YOLO('yolov8n.pt') #
+model = YOLO('yolov8n.pt') # 인공지능 모델 로드
 
 # [식약처 API]
 async def fetch_mfds(food_en: str):
-    # 사용자님의 API 키를 여기에 넣으세요.
-    API_KEY = ad6b7fb869c545d10be67ecde89d3bc3b496d6f229d5e4ac2b5ebe56c5be2879 
+    # [수정 완료] API 키를 따옴표로 감싸 문자열로 만들었습니다.
+    API_KEY = "ad6b7fb869c545d10be67ecde89d3bc3b496d6f229d5e4ac2b5ebe56c5be2879" 
+    
     trans = {"apple": "사과", "banana": "바나나", "pizza": "피자", "sandwich": "샌드위치", "hot dog": "핫도그", "donut": "도넛"}
-    ko_name = trans.get(food_en, "사과") # 기본값 사과 설정
+    ko_name = trans.get(food_en, "사과") # 기본값 설정
     url = f"http://openapi.foodsafetykorea.go.kr/api/{API_KEY}/I2790/json/1/1/DESC_KOR={ko_name}"
+    
     async with httpx.AsyncClient() as client:
         try:
             res = await client.get(url, timeout=5.0)
             data = res.json()
             if "I2790" in data and int(data["I2790"]["total_count"]) > 0:
                 row = data["I2790"]["row"][0]
-                return {"name": row["DESC_KOR"], "kcal": float(row["NUTR_CONT1"] or 0), "carbs": float(row["NUTR_CONT2"] or 0), "protein": float(row["NUTR_CONT3"] or 0), "fat": float(row["NUTR_CONT4"] or 0)}
+                return {
+                    "name": row["DESC_KOR"], 
+                    "kcal": float(row["NUTR_CONT1"] or 0), 
+                    "carbs": float(row["NUTR_CONT2"] or 0), 
+                    "protein": float(row["NUTR_CONT3"] or 0), 
+                    "fat": float(row["NUTR_CONT4"] or 0)
+                }
         except: pass
     return {"name": ko_name, "kcal": 150, "carbs": 20, "protein": 5, "fat": 2}
 
@@ -92,5 +100,6 @@ async def analyze(file: UploadFile = File(...), user_id: Optional[str] = Header(
     return res_data
 
 if __name__ == "__main__":
+    # Render 환경의 포트 자동 바인딩 설정
     port = int(os.environ.get("PORT", 10000))
     uvicorn.run(app, host="0.0.0.0", port=port)
