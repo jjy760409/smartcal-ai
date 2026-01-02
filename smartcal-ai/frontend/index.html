@@ -2,44 +2,49 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SmartCal AI Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://js.tosspayments.com/v1/payment"></script>
     <style>
-        .glass { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); }
+        @keyframes shutter { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
+        .animate-shutter { animation: shutter 0.2s ease-in-out; }
+        @keyframes slide-up { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .animate-slide-up { animation: slide-up 0.5s ease-out; }
+        .hidden { display: none; }
     </style>
 </head>
-<body class="bg-gray-900 text-white flex flex-col items-center p-6 min-h-screen">
-    <header class="w-full max-w-md flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-black text-green-400">SmartCal AI</h1>
-        <div class="px-3 py-1 bg-gray-800 rounded-full border border-gray-700 text-[10px] text-gray-400">KOREAN EDITION V2</div>
-    </header>
+<body class="bg-slate-900 text-white flex flex-col items-center min-h-screen overflow-hidden">
+    <div id="cta-container" class="w-full bg-gradient-to-r from-green-900 to-black p-3 text-center h-14 flex items-center justify-center border-b border-green-800">
+        <p id="cta-text" class="text-white text-xs sm:text-sm font-medium transition-all duration-500 transform translate-y-0 italic">
+            SmartCal AI Pro: 당신의 식단 비서가 준비 중입니다.
+        </p>
+    </div>
 
-    <div class="w-full max-w-md glass rounded-[3rem] p-6 shadow-2xl border border-gray-700">
-        <div class="relative rounded-[2rem] overflow-hidden aspect-square bg-black border-4 border-gray-800 mb-6">
-            <video id="v" autoplay playsinline class="w-full h-full object-cover"></video>
-            <div id="resultBox" class="absolute inset-0 hidden"></div>
-        </div>
+    <h1 class="text-2xl font-bold text-green-400 my-4">SmartCal AI</h1>
 
-        <div class="grid grid-cols-2 gap-4">
-            <button onclick="capture()" class="bg-green-500 hover:bg-green-600 h-16 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition">📸 촬영분석</button>
-            <label class="bg-gray-700 flex items-center justify-center rounded-2xl font-bold cursor-pointer active:scale-95 transition">
-                🖼️ 갤러리
-                <input type="file" class="hidden" onchange="upload(this.files[0])">
-            </label>
-        </div>
+    <div class="relative w-80 h-80 rounded-3xl overflow-hidden border-4 border-slate-700 shadow-2xl">
+        <video id="v" autoplay playsinline class="w-full h-full object-cover"></video>
+        <div id="resultBox" class="hidden absolute inset-0 bg-black"></div>
+        <div id="shutter" class="absolute inset-0 bg-white opacity-0 pointer-events-none"></div>
+    </div>
 
-        <div id="info" class="mt-8 hidden animate-pulse">
-            <div class="flex justify-between items-end border-b border-gray-700 pb-2 mb-4">
-                <h2 id="name" class="text-3xl font-bold text-green-300">음식명</h2>
-                <p id="kcal" class="text-xl font-bold">0 kcal</p>
-            </div>
-            <div class="grid grid-cols-3 gap-3">
-                <div class="bg-gray-800 p-3 rounded-2xl text-center"><p class="text-[10px] text-gray-500">탄수화물</p><p id="carb" class="font-bold text-blue-400">0g</p></div>
-                <div class="bg-gray-800 p-3 rounded-2xl text-center"><p class="text-[10px] text-gray-500">단백질</p><p id="prot" class="font-bold text-red-400">0g</p></div>
-                <div class="bg-gray-800 p-3 rounded-2xl text-center"><p class="text-[10px] text-gray-500">지방</p><p id="fat" class="font-bold text-yellow-400">0g</p></div>
-            </div>
+    <div id="info" class="hidden w-80 mt-4 bg-slate-800 p-4 rounded-2xl animate-slide-up">
+        <div class="flex justify-between items-center border-b border-slate-700 pb-2 mb-2">
+            <span id="name" class="text-xl font-bold text-green-400">-</span>
+            <span id="kcal" class="text-lg font-semibold">-</span>
         </div>
+        <div class="grid grid-cols-3 gap-2 text-center text-sm">
+            <div class="bg-slate-700 p-2 rounded-lg">탄<br><span id="carb" class="font-bold">-</span></div>
+            <div class="bg-slate-700 p-2 rounded-lg">단<br><span id="prot" class="font-bold">-</span></div>
+            <div class="bg-slate-700 p-2 rounded-lg">지<br><span id="fat" class="font-bold">-</span></div>
+        </div>
+    </div>
+
+    <div class="flex gap-4 mt-8">
+        <button onclick="capture()" class="bg-green-500 hover:bg-green-600 px-8 py-4 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition-all">
+            📸 촬영분석
+        </button>
     </div>
 
     <script src="app.js"></script>
